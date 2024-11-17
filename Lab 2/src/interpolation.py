@@ -1,10 +1,13 @@
 import numpy as np
 from numpy.typing import NDArray
 
+
+
 def conv_interpolate(x: NDArray, y: NDArray, xp: NDArray, kernel_func: callable) -> NDArray:
 
     interpolated_values = np.zeros_like(xp, dtype=float)
     width = np.mean(np.diff(x)) 
+   
 
     for i, x_point in enumerate(xp):
         kernel_values = kernel_func(x, x_point, width)
