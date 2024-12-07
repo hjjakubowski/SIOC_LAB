@@ -1,5 +1,6 @@
 import numpy as np
-from scipy.signal import convolve2d
+import torch
+import torch.nn.functional as Funct
 from numpy.typing import NDArray
 
 def demosaic_bayer(image: NDArray) -> NDArray:
@@ -12,27 +13,29 @@ def demosaic_bayer(image: NDArray) -> NDArray:
     """
     if image.ndim != 3 or image.shape[2] != 3:
         raise ValueError("Input image must be a 3D array with 3 color channels (RGB).")
+    image_tensor = torch.tensor(image, dtype=torch.float32).permute(2, 0, 1).unsqueeze(0) 
 
-    R = image[:, :, 0]
-    G = image[:, :, 1]
-    B = image[:, :, 2]
+    R = image_tensor[:, 0:1, :, :]  
+    G = image_tensor[:, 1:2, :, :]  
+    B = image_tensor[:, 2:2+1, :, :]
 
 
-    kernel_R = np.array([[0.25, 0.5, 0.25], 
-                         [0.5, 1.0, 0.5],
-                         [0.25, 0.5, 0.25]], dtype=np.float32)
+    red_filter = torch.tensor([[0.25, 0.5, 0.25], 
+                               [0.5, 1.0, 0.5],
+                               [0.25, 0.5, 0.25]], dtype=torch.float32).unsqueeze(0).unsqueeze(0) 
     
-    kernel_B = np.array([[0.25, 0.5, 0.25],
-                         [0.5, 1.0, 0.5], 
-                         [0.25, 0.5, 0.25]], dtype=np.float32)
+    green_filter = torch.tensor([[0, 0.25, 0],
+                                 [0.25, 1.0, 0.25],
+                                 [0, 0.25, 0]], dtype=torch.float32).unsqueeze(0).unsqueeze(0)  
     
-    kernel_G = np.array([[0, 0.25, 0],
-                         [0.25, 1.0, 0.25],
-                         [0, 0.25, 0]], dtype=np.float32)
+    blue_filter = torch.tensor([[0.25, 0.5, 0.25],
+                                [0.5, 1.0, 0.5], 
+                                [0.25, 0.5, 0.25]], dtype=torch.float32).unsqueeze(0).unsqueeze(0) 
 
-    R_interp = convolve2d(R, kernel_R, mode='same', boundary='symm')
-    G_interp = convolve2d(G, kernel_G, mode='same', boundary='symm')
-    B_interp = convolve2d(B, kernel_B, mode='same', boundary='symm')
+    R_interp = Funct.conv2d(R, red_filter, padding=1)
+    G_interp = Funct.conv2d(G, green_filter, padding=1)
+    B_interp = Funct.conv2d(B, blue_filter, padding=1)
 
-    demosaiced_image = np.stack([R_interp, G_interp, B_interp], axis=-1)
+    demosaiced_tensor = torch.cat([R_interp, G_interp, B_interp], dim=1)
+    demosaiced_image = demosaiced_tensor.squeeze(0).permute(1, 2, 0).numpy()
     return demosaiced_image
