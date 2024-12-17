@@ -14,9 +14,9 @@ def uniwersal_demosaic(image: NDArray, filter_set: dict[str, NDArray]) -> NDArra
     G = image[:, :, 1]
     B = image[:, :, 2]
 
-    R_interp = apply_convolution(R, filter_set['red'], padding=0)
-    G_interp = apply_convolution(G, filter_set['green'], padding=0)
-    B_interp = apply_convolution(B, filter_set['blue'], padding=0)
+    R_interp = apply_convolution(R, filter_set['red'])
+    G_interp = apply_convolution(G, filter_set['green'])
+    B_interp = apply_convolution(B, filter_set['blue'])
 
     demosaiced_image = np.stack([R_interp, G_interp, B_interp], axis=-1)
     return demosaiced_image
