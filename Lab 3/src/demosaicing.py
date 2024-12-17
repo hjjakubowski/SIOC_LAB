@@ -1,41 +1,22 @@
 import numpy as np
-import torch
-import torch.nn.functional as Funct
 from numpy.typing import NDArray
+from src.convlotuion import apply_convolution
 
-def demosaic_bayer(image: NDArray) -> NDArray:
-    """
-    Performs demosaicing on a Bayer-filtered RGB image using NumPy.
-    Args:
-        image: Input Bayer-filtered image as a 3D numpy array (height x width x 3).
-    Returns:
-        Demosaicked RGB image as a 3D numpy array.
-    """
-    if image.ndim != 3 or image.shape[2] != 3:
+def uniwersal_demosaic(image: NDArray, filter_set: dict[str, NDArray]) -> NDArray:
+    
+    if image.ndim != 3 or image.shape[2] != 3: 
         raise ValueError("Input image must be a 3D array with 3 color channels (RGB).")
-    image_tensor = torch.tensor(image, dtype=torch.float32).permute(2, 0, 1).unsqueeze(0) 
 
-    R = image_tensor[:, 0:1, :, :]  
-    G = image_tensor[:, 1:2, :, :]  
-    B = image_tensor[:, 2:2+1, :, :]
+    if not all(channel in filter_set for channel in ['red', 'green', 'blue']):
+        raise ValueError("Filter set must contain 'red', 'green', and 'blue' filters.")
 
+    R = image[:, :, 0]
+    G = image[:, :, 1]
+    B = image[:, :, 2]
 
-    red_filter = torch.tensor([[0.25, 0.5, 0.25], 
-                               [0.5, 1.0, 0.5],
-                               [0.25, 0.5, 0.25]], dtype=torch.float32).unsqueeze(0).unsqueeze(0) 
-    
-    green_filter = torch.tensor([[0, 0.25, 0],
-                                 [0.25, 1.0, 0.25],
-                                 [0, 0.25, 0]], dtype=torch.float32).unsqueeze(0).unsqueeze(0)  
-    
-    blue_filter = torch.tensor([[0.25, 0.5, 0.25],
-                                [0.5, 1.0, 0.5], 
-                                [0.25, 0.5, 0.25]], dtype=torch.float32).unsqueeze(0).unsqueeze(0) 
+    R_interp = apply_convolution(R, filter_set['red'], padding=0)
+    G_interp = apply_convolution(G, filter_set['green'], padding=0)
+    B_interp = apply_convolution(B, filter_set['blue'], padding=0)
 
-    R_interp = Funct.conv2d(R, red_filter, padding=1)
-    G_interp = Funct.conv2d(G, green_filter, padding=1)
-    B_interp = Funct.conv2d(B, blue_filter, padding=1)
-
-    demosaiced_tensor = torch.cat([R_interp, G_interp, B_interp], dim=1)
-    demosaiced_image = demosaiced_tensor.squeeze(0).permute(1, 2, 0).numpy()
+    demosaiced_image = np.stack([R_interp, G_interp, B_interp], axis=-1)
     return demosaiced_image
