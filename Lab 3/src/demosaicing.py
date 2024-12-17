@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.typing import NDArray
-from src.convlotuion import apply_convolution
+from src.conv import apply_convolution
 
 def uniwersal_demosaic(image: NDArray, filter_set: dict[str, NDArray]) -> NDArray:
     
