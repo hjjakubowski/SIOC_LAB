@@ -1,1 +1,1 @@
-Repozytorium stworzone na potrzeby kursy Sygnały i Obrazy Cyfrowe Labolatoria
+Repozytorium stworzone na potrzeby zajęć Laboratoryjnych kursu Sygnały i Obrazy Cyfrowe
