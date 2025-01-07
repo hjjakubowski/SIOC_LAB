@@ -6,10 +6,10 @@ def image_interpolate2d(image: NDArray, ratio: int, kernel_function: callable) -
     Interpolate image using 2D kernel interpolation
     :param image: grayscale image to interpolate as 2D NDArray
     :param ratio: up-scaling factor
-    :param kernel_funct: kernel function to use for interpolation
+    :param kernel_function: kernel function to use for interpolation
     :return: interpolated image as 2D NDArray
     """
-    w = 1 * ratio 
+    w = 1 * ratio
 
     img_rows, img_cols = image.shape
     target_shape = (img_rows * ratio, img_cols * ratio)  
@@ -17,20 +17,22 @@ def image_interpolate2d(image: NDArray, ratio: int, kernel_function: callable) -
     image_grid = np.array([[row, col] for row in range(img_rows) for col in range(img_cols)])  
 
     interpolate_grid = np.array([[row, col] for row in range(target_shape[0]) for col in range(target_shape[1])])  
-
-    kernels = []
+    
+    interpolated_img = np.zeros(target_shape)
+    
+    
     for point, value in zip(image_grid, image.ravel()):
         kernel = value * kernel_function(interpolate_grid, offset=point * ratio, width=w)  
-        kernels.append(kernel.reshape(target_shape))  
+        interpolated_img += kernel.reshape(target_shape)  
 
-    return np.sum(np.asarray(kernels), axis=0)
+    return interpolated_img
 
 def image_interpolate2d_rgb(image: NDArray, ratio: int, kernel_function: callable) -> NDArray:
     """
-    Interpolate an RGB image using 2D kernel interpolation with adjustable kernel width.
+    Interpolate an RGB image using 2D kernel interpolation
     :param image: RGB image to interpolate as a 3D NDArray (height, width, channels)
     :param ratio: up-scaling factor
-    :param kernel_funct: kernel function to use for interpolation
+    :param kernel_function: kernel function to use for interpolation
     :param w: effective width of the kernel in the interpolated coordinate space
     :return: interpolated RGB image as a 3D NDArray
     """

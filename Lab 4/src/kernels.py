@@ -17,12 +17,10 @@ def nearest_neighbour_kernel(points: NDArray, offset: float | NDArray, width: fl
 def linear_kernel(points: NDArray, offset: float | NDArray, width: float) -> NDArray:
     
     distances = points - offset
-    normalized_distances = distances / width
+    normalized_distances = np.abs(distances / width)
 
-    abs_distances = np.abs(normalized_distances)
-
-    within_range = (1 - abs_distances[:, 0]) * (1 - abs_distances[:, 1])
-    valid_range = (abs_distances[:, 0] < 1) * (abs_distances[:, 1] < 1)
+    within_range = (1 - normalized_distances[:, 0]) * (1 - normalized_distances[:, 1])
+    valid_range = (normalized_distances[:, 0] < 1) * (normalized_distances[:, 1] < 1)
     
     return np.where(valid_range, within_range, 0.0)
 
