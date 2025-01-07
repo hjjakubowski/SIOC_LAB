@@ -20,7 +20,7 @@ def image_interpolate2d(image: NDArray, ratio: int, kernel_function: callable) -
 
     kernels = []
     for point, value in zip(image_grid, image.ravel()):
-        kernel = value * kernel_function(interpolate_grid, offset=point * ratio, width=w)  # C
+        kernel = value * kernel_function(interpolate_grid, offset=point * ratio, width=w)  
         kernels.append(kernel.reshape(target_shape))  
 
     return np.sum(np.asarray(kernels), axis=0)

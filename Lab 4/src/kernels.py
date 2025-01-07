@@ -13,3 +13,16 @@ def nearest_neighbour_kernel(points: NDArray, offset: float | NDArray, width: fl
     within_range = (-width / 2 <= distances[:, 0]) & (distances[:, 0] < width / 2) & (-width / 2 <= distances[:, 1]) & (distances[:, 1] < width / 2)
     
     return np.where(within_range, 1.0, 0.0)
+
+def linear_kernel(points: NDArray, offset: float | NDArray, width: float) -> NDArray:
+    
+    distances = points - offset
+    normalized_distances = distances / width
+
+    abs_distances = np.abs(normalized_distances)
+
+    within_range = (1 - abs_distances[:, 0]) * (1 - abs_distances[:, 1])
+    valid_range = (abs_distances[:, 0] < 1) * (abs_distances[:, 1] < 1)
+    
+    return np.where(valid_range, within_range, 0.0)
+
