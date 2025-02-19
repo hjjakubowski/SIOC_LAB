@@ -1,1 +1,1 @@
-Repozytorium stworzone na potrzeby zajęć Laboratoryjnych kursu Sygnały i Obrazy Cyfrowe
+Repository created for the Machine Vision course at Wrocław University of Science and Technology.
